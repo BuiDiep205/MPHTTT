@@ -1,0 +1,65 @@
+clear; clc; close all;
+% a. Tạo chuỗi bit ngẫu nhiên có độ dài 5000 bit phân bố đều
+N_bits = 5000; 
+bit_stream = randi([0 1], 1, N_bits);
+
+% b. Mô phỏng quá trình truyền qua hệ thống
+M = 16;             % Tốc độ điều chế (16-PSK)
+k = log2(M);        % Số bit trên một ký hiệu (k = 4)
+SNR_dB = 5;         % Tỷ số tín hiệu trên nhiễu (dB)
+
+% --- Điều chế 16-PSK ---
+% Gom các bit thành các giá trị thập phân (0 đến M-1) để chuẩn bị điều chế
+% Định dạng lại chuỗi bit thành ma trận có k cột
+bit_matrix = reshape(bit_stream, k, [])';
+% Chuyển đổi ma trận bit sang ký hiệu số (thập phân)
+symbols = bi2de(bit_matrix, 'left-msb'); 
+
+% Thực hiện điều chế PSK (Sử dụng hàm pskmod mặc định định dạng Gray)
+tx_signal = pskmod(symbols, M, 0, 'gray');
+
+% --- Truyền qua kênh AWGN ---
+% Đo và tính toán năng lượng ký hiệu dựa trên SNR thực tế
+rx_signal = awgn(tx_signal, SNR_dB, 'measured');
+
+% --- Giải điều chế tại phía thu ---
+rx_symbols = pskdemod(rx_signal, M, 0, 'gray');
+% Chuyển đổi các ký hiệu ngược lại thành chuỗi bit
+rx_bit_matrix = de2bi(rx_symbols, k, 'left-msb');
+rx_bit_stream = reshape(rx_bit_matrix', 1, []);
+
+%% c. Vẽ giản đồ chòm sao (Constellation Diagram)
+figure;
+% Chòm sao trước khi qua kênh
+subplot(1, 2, 1);
+plot(real(tx_signal), imag(tx_signal), 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+grid on;
+axis square;
+xlim([-1.5 1.5]); ylim([-1.5 1.5]);
+title('Chòm sao TRƯỚC khi qua kênh (Tx)');
+xlabel('In-phase'); ylabel('Quadrature');
+
+% Chòm sao sau khi qua kênh
+subplot(1, 2, 2);
+plot(real(rx_signal), imag(rx_signal), 'b.', 'MarkerSize', 6);
+hold on;
+% Vẽ lại các điểm gốc để dễ đối chiếu
+plot(real(tx_signal), imag(tx_signal), 'ro', 'MarkerSize', 4);
+grid on;
+axis square;
+xlim([-2 2]); ylim([-2 2]);
+title(['Chòm sao SAU khi qua kênh AWGN (SNR = ', num2cell(SNR_dB), ' dB)']);
+xlabel('In-phase'); ylabel('Quadrature');
+
+%% d. Tính số lỗi bit (BER) khi chuỗi bit truyền qua hệ thống
+[num_errors, ber] = biterr(bit_stream, rx_bit_stream);
+
+% Hiển thị kết quả ra màn hình Command Window
+fprintf('\n================== KẾT QUẢ MÔ PHỎNG ==================\n');
+fprintf('Tổng số bit đã truyền: %d bit\n', N_bits);
+fprintf('Tổng số ký hiệu 16-PSK: %d ký hiệu\n', length(symbols));
+fprintf('Tỷ số SNR cài đặt:     %d dB\n', SNR_dB);
+fprintf('-----------------------------------------------------\n');
+fprintf('Số bit bị lỗi (Bit Errors):  %d bit\n', num_errors);
+fprintf('Tỷ lệ lỗi bit (BER):         %.4f (tương đương %.2f%%)\n', ber, ber*100);
+fprintf('======================================================\n');u
