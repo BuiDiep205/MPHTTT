@@ -11,9 +11,11 @@ SNR_dB = 10;
 bit_matrix = reshape(bit_stream, k, [])';
 symbols = bi2de(bit_matrix, 'left-msb');
 
+% Điều chế 4-QAM và truyền qua kênh AWGN
 tx_signal = qammod(symbols, M, 'UnitAveragePower', true);
 rx_signal = awgn(tx_signal, SNR_dB, 'measured');
 
+% Giải điều chế tại phía thu
 rz_symbols = qamdemod(rx_signal, M, 'UnitAveragePower', true);
 rx_bit_matrix = de2bi(rz_symbols, k, 'left-msb');
 rx_bit_stream = reshape(rx_bit_matrix, 1, []);

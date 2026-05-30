@@ -1,7 +1,7 @@
 function [x, y] = func_euler(f, x0, y0, h, N)
 
-x = zeros(1, N-1);
-y = zeros(1, N-1);
+x = zeros(1, N+1);
+y = zeros(1, N+1);
 
 x(1) = x0;
 y(1) = y0;

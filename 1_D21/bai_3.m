@@ -1,9 +1,9 @@
 clear; clc;
-% a. Tạo chuỗi bit ngẫu nhiên
+% a
 N_bits = 5000; 
 bit_stream = randi([0 1], 1, N_bits);
 
-% b. Mô phỏng truyền qua hệ thống 16-PSK và kênh AWGN
+% b.
 M = 16;             % 16-PSK
 k = log2(M);        % 4 bit/ký hiệu
 SNR_dB = 5;         % SNR = 5dB
