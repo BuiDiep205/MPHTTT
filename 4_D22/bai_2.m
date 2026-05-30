@@ -1,13 +1,14 @@
 clc; clear;
 
 %a
-N_bit = 1000;
+N_bit = 100;
 bit = randi([0 1], 1, N_bit);
 disp(bit);
 
 %b
 R = 100e6;
 Tb = 1/R;
+
 duty = 0.75;
 Ns = 100;
 Ns_xung  = round(duty*Ns);
